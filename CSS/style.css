@@ -3722,3 +3722,25 @@ button {
     }
 }
 
+
+/* Mobile only: align theme toggle beside Sign Out */
+@media (max-width: 600px) {
+    .topbar-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .topbar-actions .theme-toggle,
+    .topbar-actions #themeToggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        margin: 0;
+    }
+}
+
