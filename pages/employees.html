@@ -1,1 +1,131 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Employees | HCM Lite</title><link rel="stylesheet" href="../CSS/style.css"><script src="../JS/storage.js" defer></script><script src="../JS/ui.js" defer></script><script src="../JS/auth.js" defer></script><script src="../JS/employees.js" defer></script></head><body><div class="app-shell"><aside class="sidebar"><a class="brand" href="admin.html"><span class="brand-icon">H</span><span class="brand-copy"><strong>HCM <span>Lite</span></strong><small>HR workspace</small></span></a><p class="nav-label">WORKSPACE</p><a class="nav-link" href="admin.html">▦ Overview</a><a class="nav-link active" href="employees.html">♙ Employees</a><a class="nav-link" href="leaves.html">▣ Leave requests</a><a class="nav-link" href="settings.html">⚙ Settings</a><a class="nav-link" href="payslip.html">＄ Payslips</a><div class="sidebar-bottom"><button class="nav-link" data-logout>↪ Sign out</button></div></aside><main class="main-content"><header class="topbar"><div><p class="eyebrow">PEOPLE DIRECTORY</p><h1>Employees</h1></div><div class="user-pill" id="currentUser"></div></header><section class="panel"><div class="panel-heading"><div><h2 id="employeeFormTitle">Add an employee</h2><p>Adding an employee also creates their login account.</p></div></div><form id="employeeForm" class="form-grid"><input type="hidden" name="id"><label>Full name<input name="name" required placeholder="Employee full name"></label><label>Email address<input name="email" type="email" required placeholder="name@company.com"></label><label>Department<input name="department" required placeholder="e.g. Engineering"></label><label>Monthly salary (PKR)<input name="salary" type="number" min="1" required placeholder="50000"></label><label id="passwordLabel">Temporary password<input name="password" type="password" minlength="6" placeholder="Minimum 6 characters"></label><div class="form-actions"><button class="primary-btn" id="saveEmployee">Add employee</button><button class="secondary-btn hidden" type="button" id="cancelEdit">Cancel edit</button></div><p class="message full-span" id="employeeMessage" aria-live="polite"></p></form></section><section class="panel"><div class="panel-heading"><div><h2>Team directory</h2><p id="employeeCount">0 employees</p></div><div class="filter-row"><input id="employeeSearch" placeholder="Search name or email"><select id="departmentFilter"><option value="">All departments</option></select></div></div><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Email</th><th>Department</th><th>Salary</th><th>Actions</th></tr></thead><tbody id="employeeRows"></tbody></table></div></section></main></div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Employees | HCM Lite</title>
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <script src="../JS/storage.js" defer></script>
+    <script src="../JS/ui.js" defer></script>
+    <script src="../JS/auth.js" defer></script>
+    <script src="../JS/employees.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="admin.html"
+          ><span class="brand-icon">H</span
+          ><span class="brand-copy"
+            ><strong>HCM <span>Lite</span></strong
+            ><small>HR workspace</small></span
+          ></a
+        >
+        <p class="nav-label">WORKSPACE</p>
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <a class="nav-link" href="admin.html">▦ Overview</a
+          ><a class="nav-link active" href="employees.html">♙ Employees</a
+          ><a class="nav-link" href="leaves.html">▣ Leave requests</a
+          ><a class="nav-link" href="settings.html">⚙ Settings</a
+          ><a class="nav-link" href="payslip.html">＄ Payslips</a>
+        </nav>
+        <div class="sidebar-bottom">
+          <button class="nav-link" data-logout>↪ Sign out</button>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">PEOPLE DIRECTORY</p>
+            <h1>Employees</h1>
+          </div>
+          <div class="user-pill" id="currentUser"></div>
+        </header>
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2 id="employeeFormTitle">Add an employee</h2>
+              <p>Adding an employee also creates their login account.</p>
+            </div>
+          </div>
+          <form id="employeeForm" class="form-grid">
+            <input type="hidden" name="id" /><label
+              >Full name<input
+                name="name"
+                required
+                placeholder="Employee full name" /></label
+            ><label
+              >Email address<input
+                name="email"
+                type="email"
+                required
+                placeholder="name@company.com" /></label
+            ><label
+              >Department<input
+                name="department"
+                required
+                placeholder="e.g. Engineering" /></label
+            ><label
+              >Monthly salary (PKR)<input
+                name="salary"
+                type="number"
+                min="1"
+                required
+                placeholder="50000" /></label
+            ><label id="passwordLabel"
+              >Temporary password<input
+                name="password"
+                type="password"
+                minlength="6"
+                placeholder="Minimum 6 characters"
+            /></label>
+            <div class="form-actions">
+              <button class="primary-btn" id="saveEmployee">Add employee</button
+              ><button
+                class="secondary-btn hidden"
+                type="button"
+                id="cancelEdit"
+              >
+                Cancel edit
+              </button>
+            </div>
+            <p
+              class="message full-span"
+              id="employeeMessage"
+              aria-live="polite"
+            ></p>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Team directory</h2>
+              <p id="employeeCount">0 employees</p>
+            </div>
+            <div class="filter-row">
+              <input
+                id="employeeSearch"
+                placeholder="Search name or email"
+              /><select id="departmentFilter">
+                <option value="">All departments</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Email</th>
+                  <th>Department</th>
+                  <th>Salary</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employeeRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

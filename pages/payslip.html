@@ -1,1 +1,116 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Payslip | HCM Lite</title><link rel="stylesheet" href="../CSS/style.css"><script src="../JS/storage.js" defer></script><script src="../JS/ui.js" defer></script><script src="../JS/auth.js" defer></script><script src="../JS/payslip.js" defer></script></head><body><div class="app-shell"><aside class="sidebar"><a class="brand" href="admin.html"><span class="brand-icon">H</span><span class="brand-copy"><strong>HCM <span>Lite</span></strong><small>Payroll workspace</small></span></a><p class="nav-label">WORKSPACE</p><a class="nav-link" href="admin.html">▦ Overview</a><a class="nav-link" href="employees.html" data-admin-only>♙ Employees</a><a class="nav-link" href="leaves.html" data-admin-only>▣ Leave requests</a><a class="nav-link" href="settings.html" data-admin-only>⚙ Settings</a><a class="nav-link active" href="payslip.html">＄ Payslips</a><div class="sidebar-bottom"><button class="nav-link" data-logout>↪ Sign out</button></div></aside><main class="main-content"><header class="topbar no-print"><div><p class="eyebrow">PAYROLL</p><h1>Monthly payslip</h1></div><div class="user-pill" id="currentUser"></div></header><section class="panel no-print"><div class="panel-heading"><div><h2>Choose payroll period</h2><p>Calculations use saved attendance and company working days.</p></div></div><div class="filter-row"><label>Month<input type="month" id="payMonth"></label><label id="payEmployeeWrap">Employee<select id="payEmployee"></select></label><button class="primary-btn" id="generatePayslip">Generate payslip</button></div></section><section class="panel payslip-sheet" id="payslipSheet"><div class="payslip-head"><div class="brand"><span class="brand-icon">H</span><span class="brand-copy"><strong>HCM <span>Lite</span></strong><small id="payslipCompany">Human Capital Management</small></span></div><span class="payslip-label">MONTHLY PAYSLIP</span></div><div id="payslipContent" class="payslip-content"><p>Select a month and employee to generate a payslip.</p></div><button class="primary-btn no-print" id="printPayslip">Print / Save as PDF</button></section><section class="panel no-print payslip-history-panel"><div class="panel-heading"><div><span class="section-kicker">PAYROLL ARCHIVE</span><h2>Generated payslip history</h2><p>Locally recorded months and net amounts generated in this browser.</p></div></div><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Pay period</th><th>Generated</th><th>Net pay</th></tr></thead><tbody id="payslipHistoryRows"><tr><td colspan="4" class="empty-row">No generated payslips yet.</td></tr></tbody></table></div></section></main></div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Payslip | HCM Lite</title>
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <script src="../JS/storage.js" defer></script>
+    <script src="../JS/ui.js" defer></script>
+    <script src="../JS/auth.js" defer></script>
+    <script src="../JS/payslip.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="admin.html"
+          ><span class="brand-icon">H</span
+          ><span class="brand-copy"
+            ><strong>HCM <span>Lite</span></strong
+            ><small>Payroll workspace</small></span
+          ></a
+        >
+        <p class="nav-label">WORKSPACE</p>
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <a class="nav-link" href="admin.html">▦ Overview</a
+          ><a class="nav-link" href="employees.html" data-admin-only
+            >♙ Employees</a
+          ><a class="nav-link" href="leaves.html" data-admin-only
+            >▣ Leave requests</a
+          ><a class="nav-link" href="settings.html" data-admin-only
+            >⚙ Settings</a
+          ><a class="nav-link active" href="payslip.html">＄ Payslips</a>
+        </nav>
+        <div class="sidebar-bottom">
+          <button class="nav-link" data-logout>↪ Sign out</button>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="topbar no-print">
+          <div>
+            <p class="eyebrow">PAYROLL</p>
+            <h1>Monthly payslip</h1>
+          </div>
+          <div class="user-pill" id="currentUser"></div>
+        </header>
+        <section class="panel no-print">
+          <div class="panel-heading">
+            <div>
+              <h2>Choose payroll period</h2>
+              <p>Calculations use saved attendance and company working days.</p>
+            </div>
+          </div>
+          <div class="filter-row">
+            <label>Month<input type="month" id="payMonth" /></label
+            ><label id="payEmployeeWrap"
+              >Employee<select id="payEmployee"></select></label
+            ><button class="primary-btn" id="generatePayslip">
+              Generate payslip
+            </button>
+          </div>
+        </section>
+        <section class="panel payslip-sheet" id="payslipSheet">
+          <div class="payslip-head">
+            <div class="brand">
+              <span class="brand-icon">H</span
+              ><span class="brand-copy"
+                ><strong>HCM <span>Lite</span></strong
+                ><small id="payslipCompany"
+                  >Human Capital Management</small
+                ></span
+              >
+            </div>
+            <span class="payslip-label">MONTHLY PAYSLIP</span>
+          </div>
+          <div id="payslipContent" class="payslip-content">
+            <p>Select a month and employee to generate a payslip.</p>
+          </div>
+          <button class="primary-btn no-print" id="printPayslip">
+            Print / Save as PDF
+          </button>
+        </section>
+        <section class="panel no-print payslip-history-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">PAYROLL ARCHIVE</span>
+              <h2>Generated payslip history</h2>
+              <p>
+                Locally recorded months and net amounts generated in this
+                browser.
+              </p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Pay period</th>
+                  <th>Generated</th>
+                  <th>Net pay</th>
+                </tr>
+              </thead>
+              <tbody id="payslipHistoryRows">
+                <tr>
+                  <td colspan="4" class="empty-row">
+                    No generated payslips yet.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

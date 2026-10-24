@@ -1,7 +1,7 @@
 # HCM Lite — Saylani Hackathon Beginner Track
 
 ## Design direction
-Dark-first “Nightshift” interface: midnight blue/charcoal surfaces, electric violet actions, restrained mint/amber/red statuses, consistent typography, staggered page entrance, button micro-interactions, toasts, responsive layout, and a persistent light/dark toggle. This is an original implementation informed by common HR dashboard patterns, not a copied design.
+Dark-first “Nightshift” interface: midnight blue/charcoal surfaces, electric violet actions, restrained mint/amber/red statuses, consistent typography, staggered page entrance, button micro-interactions, toasts, a mobile-first responsive layout, and a persistent light/dark toggle. This is an original implementation informed by common HR dashboard patterns, not a copied design.
 
 Design inspiration references:
 - Dribbble — HR Management Dashboard, Dark Mode UI: https://dribbble.com/shots/27018971-HR-Management-Dashboard-Dark-Mode-UI-Design
@@ -15,6 +15,14 @@ Design inspiration references:
 4. Create the company and Admin account.
 5. Add an employee from the Admin Employees page. Note the credentials created for that employee.
 6. Sign out and sign in via Employee Access.
+
+## Responsive layout / final UI pass
+- Desktop uses a fixed navigation rail and fluid content area; tablet layouts reduce sidebar and card spacing.
+- Mobile navigation becomes a horizontally scrollable tab row, with the sign-out control kept visible.
+- Forms and dashboard cards stack at narrow widths; action buttons remain touch-friendly.
+- Wide data tables stay inside a horizontally scrollable container rather than squeezing text into unreadable columns.
+- Payslip print rules remove navigation and controls so the printable document gets the available page width.
+- Suggested final check before submission: use browser DevTools device emulation at 360 px, 390 px, 768 px and desktop width; test both themes and the leave/payslip flows.
 
 ## Leave request workflow
 1. Employee opens their dashboard → **Request time off**.

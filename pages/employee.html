@@ -1,18 +1,409 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#090b14"><title>My Workspace | HCM Lite</title><link rel="stylesheet" href="../CSS/style.css"><script src="../JS/storage.js" defer></script><script src="../JS/ui.js" defer></script><script src="../JS/auth.js" defer></script><script src="../JS/attendance.js" defer></script><script src="../JS/leave.js" defer></script><script src="../JS/helper.js" defer></script><script src="../JS/employee.js" defer></script></head>
-<body><div class="app-shell"><aside class="sidebar"><a class="brand" href="employee.html"><span class="brand-icon">H</span><span class="brand-copy"><strong>HCM <span>Lite</span></strong><small>PEOPLE OPERATIONS</small></span></a><p class="nav-label">MY WORKSPACE</p><a class="nav-link active" href="employee.html"><span class="nav-glyph">⌂</span>Overview</a><a class="nav-link" href="#leaveSection"><span class="nav-glyph">▦</span>Request time off</a><a class="nav-link" href="#leaveHistory"><span class="nav-glyph">◷</span>Leave history</a><a class="nav-link" href="payslip.html"><span class="nav-glyph">＄</span>My payslips</a><div class="sidebar-bottom"><div class="sidebar-note"><span class="online-dot"></span><span>Workspace synced<br><small>Saved in this browser</small></span></div><button class="nav-link" data-logout><span class="nav-glyph">↗</span>Sign out</button></div></aside>
-<main class="main-content"><header class="topbar"><div><p class="eyebrow">EMPLOYEE PORTAL / OVERVIEW</p><h1>My workspace<span class="title-period">.</span></h1><p class="page-subtitle" id="todayDate"></p></div><div class="user-pill" id="currentUser"></div></header>
-<section class="welcome-banner premium-banner"><div><span class="banner-chip"><span class="online-dot"></span> YOUR PERSONAL WORKSPACE</span><h2 id="employeeWelcome">Welcome back.</h2><p>Your workday, time off and payroll—thoughtfully organized in one place.</p></div><div class="banner-art"><span class="art-orbit orbit-one"></span><span class="art-orbit orbit-two"></span><span class="art-spark">✦</span><span class="art-monogram">H</span></div></section>
-<section class="stat-grid three-cols employee-stats"><article class="stat-card stat-accent"><div class="stat-top"><span>Today's attendance</span><span class="metric-icon">◷</span></div><strong id="myTodayStatus">Not checked in</strong><small id="myTodayTime">Your workday starts here</small></article><article class="stat-card"><div class="stat-top"><span>Leave balance</span><span class="metric-icon mint">✳</span></div><strong id="myLeaveBalance">0 days</strong><small>Approved days remaining this year</small></article><article class="stat-card"><div class="stat-top"><span>Hours this week</span><span class="metric-icon amber">⌁</span></div><strong id="myWeekHours">0.0 h</strong><small>From completed attendance records</small></article></section>
-<section class="content-grid employee-content-grid"><article class="panel attendance-panel"><div class="panel-heading"><div><span class="section-kicker">TIME TRACKING</span><h2>Your attendance</h2><p>Check in when you arrive and check out when you finish.</p></div><span class="live-pill"><span class="online-dot"></span> TODAY</span></div><div class="attendance-actions"><button class="gradient-btn" id="checkInBtn"><span>↘</span> Check in</button><button class="outline-btn" id="checkOutBtn"><span>↗</span> Check out</button></div><p class="message" id="attendanceMessage" aria-live="polite"></p><div class="table-wrap"><table><thead><tr><th>Date</th><th>Check in</th><th>Check out</th><th>Status</th><th>Hours</th></tr></thead><tbody id="myAttendanceRows"></tbody></table></div></article>
-<article class="panel leave-balance-panel"><div class="panel-heading"><div><span class="section-kicker">TIME OFF</span><h2>Leave at a glance</h2><p>Your yearly allowance and request status.</p></div><span class="metric-icon mint">✳</span></div><div class="balance-ring-wrap"><div class="balance-ring" id="leaveRing"><div><strong id="leaveUsedCount">0</strong><small>days used</small></div></div><div class="balance-legend"><div><span class="legend-dot legend-used"></span><span>Approved used</span><strong id="leaveUsedLabel">0</strong></div><div><span class="legend-dot legend-left"></span><span>Remaining</span><strong id="leaveRemainingLabel">0</strong></div></div></div><div class="mini-status-row"><div><span>Pending</span><strong id="pendingLeaveCount">0</strong></div><div><span>Approved</span><strong id="approvedLeaveCount">0</strong></div><div><span>Rejected</span><strong id="rejectedLeaveCount">0</strong></div></div><a class="inline-link" href="#leaveHistory">View all requests <span>↗</span></a></article></section>
-<section class="panel leave-application-panel" id="leaveSection"><div class="panel-heading leave-heading"><div><span class="section-kicker">REQUEST TIME OFF</span><h2>Plan your time away</h2><p>Complete the details below. Your request will be sent to the HR administrator for review.</p></div><span class="leave-heading-icon">✦</span></div><div class="form-progress"><span class="progress-number">01</span><div><strong>Leave request details</strong><small>Fields marked with * are required</small></div><span class="form-secure">◈ Private to HR</span></div>
-<form id="leaveApplyForm" class="leave-request-form"><div class="form-grid leave-form-grid"><label>Leave category *<select name="type" id="leaveType" required><option value="Casual">Casual leave</option><option value="Sick">Sick leave</option><option value="Annual">Annual leave</option><option value="Unpaid">Unpaid leave</option><option value="Emergency">Emergency leave</option><option value="Other">Other</option></select><small class="field-hint">Choose the category that best matches your request.</small></label><label>Reason for leave *<select name="reasonType" required><option value="Personal matters">Personal matters</option><option value="Medical appointment">Medical appointment</option><option value="Illness or recovery">Illness or recovery</option><option value="Family commitment">Family commitment</option><option value="Travel / vacation">Travel / vacation</option><option value="Urgent / emergency">Urgent / emergency</option><option value="Other">Other</option></select><small class="field-hint">You can add the details below.</small></label>
-<label>First day of leave *<input type="date" name="from" id="leaveFrom" required><small class="field-hint">When will your leave begin?</small></label><label>Last day of leave *<input type="date" name="to" id="leaveTo" required><small class="field-hint">Include your final day away.</small></label>
-<div class="leave-duration-card full-span"><div class="duration-symbol">◷</div><div class="duration-copy"><span>Estimated leave duration</span><strong id="leaveDuration">Select your dates</strong><small>Working days only; non-working days are excluded.</small></div><div class="duration-quota"><span>Available balance</span><strong id="leaveFormBalance">—</strong></div></div>
-<label class="full-span">Additional details / reason *<textarea name="reason" id="leaveReason" rows="4" required minlength="8" placeholder="Please provide enough detail for your manager to review the request…"></textarea><small class="field-hint">Keep it clear and professional. Do not include unnecessary sensitive medical details.</small></label>
-<label>Contact while away<input type="text" name="contact" maxlength="80" placeholder="Optional phone number or email"><small class="field-hint">How HR can reach you if needed.</small></label><label>Handover / coverage plan<input type="text" name="handover" maxlength="180" placeholder="Optional colleague or task handover"><small class="field-hint">Who will cover urgent tasks?</small></label></div>
-<div class="leave-form-footer"><div class="form-note"><span>ⓘ</span><p>Requests remain <strong>Pending</strong> until HR decides. Approved leave is deducted from your yearly allowance.</p></div><button class="gradient-btn submit-leave-btn" type="submit"><span>↗</span> Submit leave request</button></div><p class="message" id="applyLeaveMessage" aria-live="polite"></p></form></section>
-<section class="panel history-panel" id="leaveHistory"><div class="panel-heading"><div><span class="section-kicker">YOUR RECORD</span><h2>Leave request history</h2><p>Track every request and read the administrator's decision or feedback.</p></div><select id="myLeaveFilter" aria-label="Filter leave requests"><option value="">All requests</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div><div class="table-wrap"><table><thead><tr><th>Request</th><th>Dates</th><th>Days</th><th>Submitted</th><th>Status</th><th>HR feedback</th></tr></thead><tbody id="myLeaveRows"><tr><td colspan="6" class="empty-row">Your requests will appear here.</td></tr></tbody></table></div></section>
-<section class="panel helper-panel ai-panel"><div class="ai-header"><div class="ai-brand"><div class="ai-avatar"><span>✦</span><i></i></div><div><span class="section-kicker">HCM INTELLIGENCE</span><h2>Ask your HR assistant</h2><p>Your personal assistant for attendance, leave and payroll questions.</p></div></div><span class="ai-live"><span class="online-dot"></span> READY TO HELP</span></div><div class="chat-log" id="chatLog"><div class="ai-welcome"><div class="ai-mini-avatar">✦</div><div><strong>Hi there! How can I help?</strong><p>I can answer questions using your saved HR records.</p></div></div><div class="quick-prompts"><button type="button" data-prompt="How many leaves do I have left?">My leave balance</button><button type="button" data-prompt="What is my leave request status?">Leave request status</button><button type="button" data-prompt="Was I late today?">Today's attendance</button></div></div><form id="helperForm" class="chat-form"><span class="chat-input-icon">✦</span><input name="question" required placeholder="Ask about your own HR data…"><button class="gradient-btn" aria-label="Send question">Send <span>↗</span></button></form><p class="ai-footnote">Answers are based on this browser's saved records.</p></section>
-</main></div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090b14" />
+    <title>My Workspace | HCM Lite</title>
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <script src="../JS/storage.js" defer></script>
+    <script src="../JS/ui.js" defer></script>
+    <script src="../JS/auth.js" defer></script>
+    <script src="../JS/attendance.js" defer></script>
+    <script src="../JS/leave.js" defer></script>
+    <script src="../JS/helper.js" defer></script>
+    <script src="../JS/employee.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="employee.html"
+          ><span class="brand-icon">H</span
+          ><span class="brand-copy"
+            ><strong>HCM <span>Lite</span></strong
+            ><small>PEOPLE OPERATIONS</small></span
+          ></a
+        >
+        <p class="nav-label">MY WORKSPACE</p>
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <a class="nav-link active" href="employee.html"
+            ><span class="nav-glyph">⌂</span>Overview</a
+          ><a class="nav-link" href="#leaveSection"
+            ><span class="nav-glyph">▦</span>Request time off</a
+          ><a class="nav-link" href="#leaveHistory"
+            ><span class="nav-glyph">◷</span>Leave history</a
+          ><a class="nav-link" href="payslip.html"
+            ><span class="nav-glyph">＄</span>My payslips</a
+          >
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="sidebar-note">
+            <span class="online-dot"></span
+            ><span
+              >Workspace synced<br /><small>Saved in this browser</small></span
+            >
+          </div>
+          <button class="nav-link" data-logout>
+            <span class="nav-glyph">↗</span>Sign out
+          </button>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">EMPLOYEE PORTAL / OVERVIEW</p>
+            <h1>My workspace<span class="title-period">.</span></h1>
+            <p class="page-subtitle" id="todayDate"></p>
+          </div>
+          <div class="user-pill" id="currentUser"></div>
+        </header>
+        <section class="welcome-banner premium-banner">
+          <div>
+            <span class="banner-chip"
+              ><span class="online-dot"></span> YOUR PERSONAL WORKSPACE</span
+            >
+            <h2 id="employeeWelcome">Welcome back.</h2>
+            <p>
+              Your workday, time off and payroll—thoughtfully organized in one
+              place.
+            </p>
+          </div>
+          <div class="banner-art">
+            <span class="art-orbit orbit-one"></span
+            ><span class="art-orbit orbit-two"></span
+            ><span class="art-spark">✦</span><span class="art-monogram">H</span>
+          </div>
+        </section>
+        <section class="stat-grid three-cols employee-stats">
+          <article class="stat-card stat-accent">
+            <div class="stat-top">
+              <span>Today's attendance</span><span class="metric-icon">◷</span>
+            </div>
+            <strong id="myTodayStatus">Not checked in</strong
+            ><small id="myTodayTime">Your workday starts here</small>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Leave balance</span><span class="metric-icon mint">✳</span>
+            </div>
+            <strong id="myLeaveBalance">0 days</strong
+            ><small>Approved days remaining this year</small>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Hours this week</span
+              ><span class="metric-icon amber">⌁</span>
+            </div>
+            <strong id="myWeekHours">0.0 h</strong
+            ><small>From completed attendance records</small>
+          </article>
+        </section>
+        <section class="content-grid employee-content-grid">
+          <article class="panel attendance-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">TIME TRACKING</span>
+                <h2>Your attendance</h2>
+                <p>Check in when you arrive and check out when you finish.</p>
+              </div>
+              <span class="live-pill"
+                ><span class="online-dot"></span> TODAY</span
+              >
+            </div>
+            <div class="attendance-actions">
+              <button class="gradient-btn" id="checkInBtn">
+                <span>↘</span> Check in</button
+              ><button class="outline-btn" id="checkOutBtn">
+                <span>↗</span> Check out
+              </button>
+            </div>
+            <p class="message" id="attendanceMessage" aria-live="polite"></p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Check in</th>
+                    <th>Check out</th>
+                    <th>Status</th>
+                    <th>Hours</th>
+                  </tr>
+                </thead>
+                <tbody id="myAttendanceRows"></tbody>
+              </table>
+            </div>
+          </article>
+          <article class="panel leave-balance-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">TIME OFF</span>
+                <h2>Leave at a glance</h2>
+                <p>Your yearly allowance and request status.</p>
+              </div>
+              <span class="metric-icon mint">✳</span>
+            </div>
+            <div class="balance-ring-wrap">
+              <div class="balance-ring" id="leaveRing">
+                <div>
+                  <strong id="leaveUsedCount">0</strong><small>days used</small>
+                </div>
+              </div>
+              <div class="balance-legend">
+                <div>
+                  <span class="legend-dot legend-used"></span
+                  ><span>Approved used</span
+                  ><strong id="leaveUsedLabel">0</strong>
+                </div>
+                <div>
+                  <span class="legend-dot legend-left"></span
+                  ><span>Remaining</span
+                  ><strong id="leaveRemainingLabel">0</strong>
+                </div>
+              </div>
+            </div>
+            <div class="mini-status-row">
+              <div>
+                <span>Pending</span><strong id="pendingLeaveCount">0</strong>
+              </div>
+              <div>
+                <span>Approved</span><strong id="approvedLeaveCount">0</strong>
+              </div>
+              <div>
+                <span>Rejected</span><strong id="rejectedLeaveCount">0</strong>
+              </div>
+            </div>
+            <a class="inline-link" href="#leaveHistory"
+              >View all requests <span>↗</span></a
+            >
+          </article>
+        </section>
+        <section class="panel leave-application-panel" id="leaveSection">
+          <div class="panel-heading leave-heading">
+            <div>
+              <span class="section-kicker">REQUEST TIME OFF</span>
+              <h2>Plan your time away</h2>
+              <p>
+                Complete the details below. Your request will be sent to the HR
+                administrator for review.
+              </p>
+            </div>
+            <span class="leave-heading-icon">✦</span>
+          </div>
+          <div class="form-progress">
+            <span class="progress-number">01</span>
+            <div>
+              <strong>Leave request details</strong
+              ><small>Fields marked with * are required</small>
+            </div>
+            <span class="form-secure">◈ Private to HR</span>
+          </div>
+          <form id="leaveApplyForm" class="leave-request-form">
+            <div class="form-grid leave-form-grid">
+              <label
+                >Leave category *<select name="type" id="leaveType" required>
+                  <option value="Casual">Casual leave</option>
+                  <option value="Sick">Sick leave</option>
+                  <option value="Annual">Annual leave</option>
+                  <option value="Unpaid">Unpaid leave</option>
+                  <option value="Emergency">Emergency leave</option>
+                  <option value="Other">Other</option></select
+                ><small class="field-hint"
+                  >Choose the category that best matches your request.</small
+                ></label
+              ><label
+                >Reason for leave *<select name="reasonType" required>
+                  <option value="Personal matters">Personal matters</option>
+                  <option value="Medical appointment">
+                    Medical appointment
+                  </option>
+                  <option value="Illness or recovery">
+                    Illness or recovery
+                  </option>
+                  <option value="Family commitment">Family commitment</option>
+                  <option value="Travel / vacation">Travel / vacation</option>
+                  <option value="Urgent / emergency">Urgent / emergency</option>
+                  <option value="Other">Other</option></select
+                ><small class="field-hint"
+                  >You can add the details below.</small
+                ></label
+              >
+              <label
+                >First day of leave *<input
+                  type="date"
+                  name="from"
+                  id="leaveFrom"
+                  required
+                /><small class="field-hint"
+                  >When will your leave begin?</small
+                ></label
+              ><label
+                >Last day of leave *<input
+                  type="date"
+                  name="to"
+                  id="leaveTo"
+                  required
+                /><small class="field-hint"
+                  >Include your final day away.</small
+                ></label
+              >
+              <div class="leave-duration-card full-span">
+                <div class="duration-symbol">◷</div>
+                <div class="duration-copy">
+                  <span>Estimated leave duration</span
+                  ><strong id="leaveDuration">Select your dates</strong
+                  ><small
+                    >Working days only; non-working days are excluded.</small
+                  >
+                </div>
+                <div class="duration-quota">
+                  <span>Available balance</span
+                  ><strong id="leaveFormBalance">—</strong>
+                </div>
+              </div>
+              <label class="full-span"
+                >Additional details / reason *<textarea
+                  name="reason"
+                  id="leaveReason"
+                  rows="4"
+                  required
+                  minlength="8"
+                  placeholder="Please provide enough detail for your manager to review the request…"
+                ></textarea
+                ><small class="field-hint"
+                  >Keep it clear and professional. Do not include unnecessary
+                  sensitive medical details.</small
+                ></label
+              >
+              <label
+                >Contact while away<input
+                  type="text"
+                  name="contact"
+                  maxlength="80"
+                  placeholder="Optional phone number or email"
+                /><small class="field-hint"
+                  >How HR can reach you if needed.</small
+                ></label
+              ><label
+                >Handover / coverage plan<input
+                  type="text"
+                  name="handover"
+                  maxlength="180"
+                  placeholder="Optional colleague or task handover"
+                /><small class="field-hint"
+                  >Who will cover urgent tasks?</small
+                ></label
+              >
+            </div>
+            <div class="leave-form-footer">
+              <div class="form-note">
+                <span>ⓘ</span>
+                <p>
+                  Requests remain <strong>Pending</strong> until HR decides.
+                  Approved leave is deducted from your yearly allowance.
+                </p>
+              </div>
+              <button class="gradient-btn submit-leave-btn" type="submit">
+                <span>↗</span> Submit leave request
+              </button>
+            </div>
+            <p class="message" id="applyLeaveMessage" aria-live="polite"></p>
+          </form>
+        </section>
+        <section class="panel history-panel" id="leaveHistory">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">YOUR RECORD</span>
+              <h2>Leave request history</h2>
+              <p>
+                Track every request and read the administrator's decision or
+                feedback.
+              </p>
+            </div>
+            <select id="myLeaveFilter" aria-label="Filter leave requests">
+              <option value="">All requests</option>
+              <option>Pending</option>
+              <option>Approved</option>
+              <option>Rejected</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Request</th>
+                  <th>Dates</th>
+                  <th>Days</th>
+                  <th>Submitted</th>
+                  <th>Status</th>
+                  <th>HR feedback</th>
+                </tr>
+              </thead>
+              <tbody id="myLeaveRows">
+                <tr>
+                  <td colspan="6" class="empty-row">
+                    Your requests will appear here.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel helper-panel ai-panel">
+          <div class="ai-header">
+            <div class="ai-brand">
+              <div class="ai-avatar"><span>✦</span><i></i></div>
+              <div>
+                <span class="section-kicker">HCM INTELLIGENCE</span>
+                <h2>Ask your HR assistant</h2>
+                <p>
+                  Your personal assistant for attendance, leave and payroll
+                  questions.
+                </p>
+              </div>
+            </div>
+            <span class="ai-live"
+              ><span class="online-dot"></span> READY TO HELP</span
+            >
+          </div>
+          <div class="chat-log" id="chatLog">
+            <div class="ai-welcome">
+              <div class="ai-mini-avatar">✦</div>
+              <div>
+                <strong>Hi there! How can I help?</strong>
+                <p>I can answer questions using your saved HR records.</p>
+              </div>
+            </div>
+            <div class="quick-prompts">
+              <button
+                type="button"
+                data-prompt="How many leaves do I have left?"
+              >
+                My leave balance</button
+              ><button
+                type="button"
+                data-prompt="What is my leave request status?"
+              >
+                Leave request status</button
+              ><button type="button" data-prompt="Was I late today?">
+                Today's attendance
+              </button>
+            </div>
+          </div>
+          <form id="helperForm" class="chat-form">
+            <span class="chat-input-icon">✦</span
+            ><input
+              name="question"
+              required
+              placeholder="Ask about your own HR data…"
+            /><button class="gradient-btn" aria-label="Send question">
+              Send <span>↗</span>
+            </button>
+          </form>
+          <p class="ai-footnote">
+            Answers are based on this browser's saved records.
+          </p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,1 +1,119 @@
-document.addEventListener("DOMContentLoaded",()=>{const H=window.HCM;if(!H)return;const session=H.getSession(),month=document.querySelector("#payMonth"),employee=document.querySelector("#payEmployee"),content=document.querySelector("#payslipContent"),company=H.getCompany();document.querySelector("#payslipCompany").textContent=company.name;const now=new Date();month.value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;const users=H.getUsers().filter(u=>u.role==="employee");if(session.role==="employee"){document.querySelector("#payEmployeeWrap").classList.add("hidden");document.querySelectorAll("[data-admin-only]").forEach(el=>el.classList.add("hidden"))}else{employee.innerHTML=users.map(u=>`<option value="${u.id}">${H.escapeHTML(u.name)}</option>`).join("")}function generate(){const chosen=session.role==="employee"?H.byId(session.id):H.byId(employee.value);if(!chosen){content.innerHTML="<p>Add an employee first to generate a payslip.</p>";return}const [year,mon]=month.value.split("-").map(Number);if(!year||!mon)return;const days=company.settings.workingDays,working=H.workingDaysInMonth(year,mon-1,days),records=H.getAttendance().filter(a=>String(a.userId)===String(chosen.id)&&a.date.startsWith(month.value)),recorded=new Set(records.map(a=>a.date)),absentDates=[];for(let d=new Date(year,mon-1,1);d.getMonth()===mon-1;d.setDate(d.getDate()+1)){if(days.includes(d.getDay())){const date=d.toLocaleDateString("en-CA");if(!recorded.has(date))absentDates.push(date)}}const leaves=H.getLeaves().filter(l=>String(l.userId)===String(chosen.id)&&l.status==="Approved"),today=H.today();const absent=absentDates.filter(date=>{if(month.value===today.slice(0,7)&&date>today)return false;return !leaves.some(l=>l.from<=date&&l.to>=date)}).length,half=records.filter(a=>a.status==="Half day").length,perDay=Number(chosen.salary)/Math.max(1,working),deduction=perDay*(absent+0.5*half),net=Math.max(0,Number(chosen.salary)-deduction);content.innerHTML=`<div class="payslip-person"><div><small>EMPLOYEE</small><strong>${H.escapeHTML(chosen.name)}</strong></div><div><small>EMAIL</small><strong>${H.escapeHTML(chosen.email)}</strong></div><div><small>DEPARTMENT</small><strong>${H.escapeHTML(chosen.department)}</strong></div><div><small>PAY PERIOD</small><strong>${month.value}</strong></div></div><div class="table-wrap"><table><tbody><tr><td>Monthly base salary</td><td>${H.money(chosen.salary)}</td></tr><tr><td>Working days this month</td><td>${working}</td></tr><tr><td>Absent days (no record)</td><td>${absent}</td></tr><tr><td>Half days</td><td>${half}</td></tr><tr><td>Per-day salary</td><td>${H.money(perDay)}</td></tr><tr><td>Deduction</td><td>− ${H.money(deduction)}</td></tr></tbody></table></div><div class="salary-total"><span>NET PAY</span><strong>${H.money(net)}</strong></div><p class="message">Note: a working day without an attendance record is counted as absent. Review the records before using this demo calculation.</p>`;const history=JSON.parse(localStorage.getItem("hcm_payslip_history")||"[]");if(!history.some(x=>String(x.userId)===String(chosen.id)&&x.month===month.value)){history.unshift({userId:chosen.id,month:month.value,generatedAt:Date.now(),net});localStorage.setItem("hcm_payslip_history",JSON.stringify(history.slice(0,100)))}}function renderHistory(){const rows=document.querySelector("#payslipHistoryRows");if(!rows)return;const history=JSON.parse(localStorage.getItem("hcm_payslip_history")||"[]").filter(x=>session.role==="admin"||String(x.userId)===String(session.id)).sort((a,b)=>b.generatedAt-a.generatedAt);rows.innerHTML=history.length?history.map(x=>{const u=H.byId(x.userId);return `<tr><td>${H.escapeHTML(u?.name||"Deleted employee")}</td><td>${H.escapeHTML(x.month)}</td><td>${new Date(x.generatedAt).toLocaleDateString("en-PK",{day:"numeric",month:"short",year:"numeric"})}</td><td><strong>${H.money(x.net)}</strong></td></tr>`}).join(""):'<tr><td colspan="4" class="empty-row">No generated payslips yet. Generate a payslip to start this archive.</td></tr>'}document.querySelector("#generatePayslip").addEventListener("click",()=>{generate();renderHistory();if(H.toast)H.toast("Payslip generated and added to your local archive.")});document.querySelector("#printPayslip").addEventListener("click",()=>window.print());if(session.role==="employee"){employee.value=String(session.id)}generate();renderHistory()});
+document.addEventListener("DOMContentLoaded", () => {
+  const H = window.HCM;
+  if (!H) return;
+  const session = H.getSession(),
+    month = document.querySelector("#payMonth"),
+    employee = document.querySelector("#payEmployee"),
+    content = document.querySelector("#payslipContent"),
+    company = H.getCompany();
+  document.querySelector("#payslipCompany").textContent = company.name;
+  const now = new Date();
+  month.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const users = H.getUsers().filter((u) => u.role === "employee");
+  if (session.role === "employee") {
+    document.querySelector("#payEmployeeWrap").classList.add("hidden");
+    document
+      .querySelectorAll("[data-admin-only]")
+      .forEach((el) => el.classList.add("hidden"));
+  } else {
+    employee.innerHTML = users
+      .map((u) => `<option value="${u.id}">${H.escapeHTML(u.name)}</option>`)
+      .join("");
+  }
+  function generate() {
+    const chosen =
+      session.role === "employee" ? H.byId(session.id) : H.byId(employee.value);
+    if (!chosen) {
+      content.innerHTML = "<p>Add an employee first to generate a payslip.</p>";
+      return;
+    }
+    const [year, mon] = month.value.split("-").map(Number);
+    if (!year || !mon) return;
+    const days = company.settings.workingDays,
+      working = H.workingDaysInMonth(year, mon - 1, days),
+      records = H.getAttendance().filter(
+        (a) =>
+          String(a.userId) === String(chosen.id) &&
+          a.date.startsWith(month.value),
+      ),
+      recorded = new Set(records.map((a) => a.date)),
+      absentDates = [];
+    for (
+      let d = new Date(year, mon - 1, 1);
+      d.getMonth() === mon - 1;
+      d.setDate(d.getDate() + 1)
+    ) {
+      if (days.includes(d.getDay())) {
+        const date = d.toLocaleDateString("en-CA");
+        if (!recorded.has(date)) absentDates.push(date);
+      }
+    }
+    const leaves = H.getLeaves().filter(
+        (l) =>
+          String(l.userId) === String(chosen.id) && l.status === "Approved",
+      ),
+      today = H.today();
+    const absent = absentDates.filter((date) => {
+        if (month.value === today.slice(0, 7) && date > today) return false;
+        return !leaves.some((l) => l.from <= date && l.to >= date);
+      }).length,
+      half = records.filter((a) => a.status === "Half day").length,
+      perDay = Number(chosen.salary) / Math.max(1, working),
+      deduction = perDay * (absent + 0.5 * half),
+      net = Math.max(0, Number(chosen.salary) - deduction);
+    content.innerHTML = `<div class="payslip-person"><div><small>EMPLOYEE</small><strong>${H.escapeHTML(chosen.name)}</strong></div><div><small>EMAIL</small><strong>${H.escapeHTML(chosen.email)}</strong></div><div><small>DEPARTMENT</small><strong>${H.escapeHTML(chosen.department)}</strong></div><div><small>PAY PERIOD</small><strong>${month.value}</strong></div></div><div class="table-wrap"><table><tbody><tr><td>Monthly base salary</td><td>${H.money(chosen.salary)}</td></tr><tr><td>Working days this month</td><td>${working}</td></tr><tr><td>Absent days (no record)</td><td>${absent}</td></tr><tr><td>Half days</td><td>${half}</td></tr><tr><td>Per-day salary</td><td>${H.money(perDay)}</td></tr><tr><td>Deduction</td><td>− ${H.money(deduction)}</td></tr></tbody></table></div><div class="salary-total"><span>NET PAY</span><strong>${H.money(net)}</strong></div><p class="message">Note: a working day without an attendance record is counted as absent. Review the records before using this demo calculation.</p>`;
+    const history = JSON.parse(
+      localStorage.getItem("hcm_payslip_history") || "[]",
+    );
+    if (
+      !history.some(
+        (x) =>
+          String(x.userId) === String(chosen.id) && x.month === month.value,
+      )
+    ) {
+      history.unshift({
+        userId: chosen.id,
+        month: month.value,
+        generatedAt: Date.now(),
+        net,
+      });
+      localStorage.setItem(
+        "hcm_payslip_history",
+        JSON.stringify(history.slice(0, 100)),
+      );
+    }
+  }
+  function renderHistory() {
+    const rows = document.querySelector("#payslipHistoryRows");
+    if (!rows) return;
+    const history = JSON.parse(
+      localStorage.getItem("hcm_payslip_history") || "[]",
+    )
+      .filter(
+        (x) =>
+          session.role === "admin" || String(x.userId) === String(session.id),
+      )
+      .sort((a, b) => b.generatedAt - a.generatedAt);
+    rows.innerHTML = history.length
+      ? history
+          .map((x) => {
+            const u = H.byId(x.userId);
+            return `<tr><td>${H.escapeHTML(u?.name || "Deleted employee")}</td><td>${H.escapeHTML(x.month)}</td><td>${new Date(x.generatedAt).toLocaleDateString("en-PK", { day: "numeric", month: "short", year: "numeric" })}</td><td><strong>${H.money(x.net)}</strong></td></tr>`;
+          })
+          .join("")
+      : '<tr><td colspan="4" class="empty-row">No generated payslips yet. Generate a payslip to start this archive.</td></tr>';
+  }
+  document.querySelector("#generatePayslip").addEventListener("click", () => {
+    generate();
+    renderHistory();
+    if (H.toast) H.toast("Payslip generated and added to your local archive.");
+  });
+  document
+    .querySelector("#printPayslip")
+    .addEventListener("click", () => window.print());
+  if (session.role === "employee") {
+    employee.value = String(session.id);
+  }
+  generate();
+  renderHistory();
+});

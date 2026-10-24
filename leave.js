@@ -1,0 +1,327 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const H = window.HCM;
+  if (!H) return;
+  const session = H.getSession();
+  if (!session) return;
+  const company = H.getCompany() || {
+    settings: { leaveQuota: 20, workingDays: [1, 2, 3, 4, 5] },
+  };
+  const settings = company.settings || {};
+  const working = settings.workingDays || [1, 2, 3, 4, 5];
+  const quota = () => Number(settings.leaveQuota ?? 20);
+  const toast = (m, t = "success") => (H.toast ? H.toast(m, t) : null);
+  const statusClass = (s) => String(s || "pending").toLowerCase();
+  const dateRange = (l) => `${H.fmtDate(l.from)} – ${H.fmtDate(l.to)}`;
+  const niceSubmitted = (l) =>
+    l.createdAt
+      ? new Date(l.createdAt).toLocaleDateString("en-PK", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
+      : "—";
+  // Admin review inbox
+  const adminRows = document.querySelector("#leaveRows");
+  if (adminRows) {
+    const filter = document.querySelector("#leaveFilter"),
+      search = document.querySelector("#leaveSearch"),
+      msg = document.querySelector("#leaveMessage");
+    function render() {
+      const all = H.getLeaves()
+        .slice()
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const term = (search?.value || "").trim().toLowerCase();
+      const leaves = all.filter(
+        (l) =>
+          (!filter?.value || l.status === filter.value) &&
+          (!term ||
+            String(H.byId(l.userId)?.name || "")
+              .toLowerCase()
+              .includes(term) ||
+            String(l.type).toLowerCase().includes(term) ||
+            String(l.reason).toLowerCase().includes(term)),
+      );
+      const count = (s) => all.filter((l) => l.status === s).length;
+      document.querySelector("#adminPendingCount").textContent =
+        count("Pending");
+      document.querySelector("#adminApprovedCount").textContent =
+        count("Approved");
+      document.querySelector("#adminRejectedCount").textContent =
+        count("Rejected");
+      const nav = document.querySelector("#pendingNavCount");
+      if (nav) nav.textContent = count("Pending");
+      adminRows.innerHTML = leaves.length
+        ? leaves
+            .map((l) => {
+              const u = H.byId(l.userId),
+                name = u?.name || "Deleted employee",
+                initials = name
+                  .split(/\s+/)
+                  .map((n) => n[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase();
+              const pending = l.status === "Pending";
+              return `<tr><td><div class="employee-cell"><span class="employee-avatar">${H.escapeHTML(initials)}</span><span><strong>${H.escapeHTML(name)}</strong><small>${H.escapeHTML(u?.department || "Team member")}</small><small>${H.escapeHTML(u?.email || "")}</small></span></div></td><td><strong>${H.escapeHTML(l.type || "Leave")} leave</strong><small class="cell-subline">Submitted ${niceSubmitted(l)}</small></td><td><strong>${dateRange(l)}</strong><small class="cell-subline">${Number(l.days) || 0} working day(s)</small></td><td><div class="reason-cell"><strong>${H.escapeHTML(l.reasonType || l.reason || "No reason provided")}</strong><small>${H.escapeHTML(l.reason || "")}</small>${l.contact ? `<small>Contact: ${H.escapeHTML(l.contact)}</small>` : ""}${l.handover ? `<small>Handover: ${H.escapeHTML(l.handover)}</small>` : ""}</div></td><td><span class="status-pill status-${statusClass(l.status)}"><i></i>${H.escapeHTML(l.status || "Pending")}</span>${l.comment ? `<small class="cell-subline">HR: ${H.escapeHTML(l.comment)}</small>` : ""}${l.decidedAt ? `<small class="cell-subline">Decided ${new Date(l.decidedAt).toLocaleDateString("en-PK")}</small>` : ""}</td><td>${pending ? `<div class="decision-box"><textarea rows="2" placeholder="Decision note (required for rejection)" data-comment="${l.id}" aria-label="Decision note for ${H.escapeHTML(name)}"></textarea><div class="decision-buttons"><button class="gradient-btn mini-btn" data-approve="${l.id}">✓ Approve</button><button class="danger-btn mini-btn" data-reject="${l.id}">× Reject</button></div></div>` : `<span class="review-complete">✓ Decision saved</span>`}</td></tr>`;
+            })
+            .join("")
+        : '<tr><td colspan="6" class="empty-row"><div class="empty-state"><span>▦</span><strong>No requests found</strong><small>New employee leave requests will appear here.</small></div></td></tr>';
+    }
+    adminRows.addEventListener("click", (e) => {
+      const approve = e.target.closest("[data-approve]"),
+        reject = e.target.closest("[data-reject]");
+      if (!approve && !reject) return;
+      const id = (approve || reject).dataset[approve ? "approve" : "reject"],
+        all = H.getLeaves(),
+        l = all.find((x) => String(x.id) === String(id));
+      if (!l || l.status !== "Pending") return;
+      const comment =
+        document.querySelector(`[data-comment="${id}"]`)?.value.trim() || "";
+      if (reject && !comment) {
+        H.setMessage(
+          msg,
+          "Please add a short reason before rejecting this request.",
+          "error",
+        );
+        document.querySelector(`[data-comment="${id}"]`)?.focus();
+        toast("A rejection reason is required.", "error");
+        return;
+      }
+      if (approve) {
+        const year = new Date(l.from + "T12:00:00").getFullYear(),
+          used = all
+            .filter(
+              (x) =>
+                String(x.userId) === String(l.userId) &&
+                x.status === "Approved" &&
+                new Date(x.from + "T12:00:00").getFullYear() === year,
+            )
+            .reduce(
+              (sum, x) => sum + H.workingDaysBetween(x.from, x.to, working),
+              0,
+            );
+        if (used + Number(l.days) > quota()) {
+          H.setMessage(
+            msg,
+            `Cannot approve: ${quota()} days are allowed per year and ${used} approved day(s) are already used.`,
+            "error",
+          );
+          toast(
+            "The employee's yearly leave quota would be exceeded.",
+            "error",
+          );
+          return;
+        }
+        l.status = "Approved";
+      } else l.status = "Rejected";
+      l.comment = comment;
+      l.decidedAt = Date.now();
+      l.decidedBy = session.id;
+      H.saveLeaves(all);
+      H.setMessage(
+        msg,
+        `${H.byId(l.userId)?.name || "Employee"} — leave request ${l.status.toLowerCase()} successfully.`,
+        "success",
+      );
+      toast(
+        `Leave request ${l.status.toLowerCase()} and employee status updated.`,
+      );
+      render();
+    });
+    filter?.addEventListener("change", render);
+    search?.addEventListener("input", render);
+    render();
+  }
+  // Employee request form + records
+  const form = document.querySelector("#leaveApplyForm");
+  if (form) {
+    const msg = document.querySelector("#applyLeaveMessage"),
+      fromInput = form.querySelector('[name="from"]'),
+      toInput = form.querySelector('[name="to"]'),
+      duration = document.querySelector("#leaveDuration"),
+      balanceEl = document.querySelector("#leaveFormBalance"),
+      filter = document.querySelector("#myLeaveFilter");
+    const today = H.today();
+    fromInput.min = today;
+    toInput.min = today;
+    const currentYear = () => new Date().getFullYear();
+    function remaining() {
+      return Math.max(
+        0,
+        quota() - H.approvedLeaveDays(session.id, currentYear()),
+      );
+    }
+    function updateDuration() {
+      const from = fromInput.value,
+        to = toInput.value;
+      if (from) toInput.min = from > today ? from : today;
+      if (!from || !to || from > to) {
+        duration.textContent = "Select valid dates";
+        return 0;
+      }
+      const days = H.workingDaysBetween(from, to, working);
+      duration.textContent = days
+        ? `${days} working day${days === 1 ? "" : "s"}`
+        : "No working days in this range";
+      return days;
+    }
+    function renderMine() {
+      const all = H.getLeaves()
+          .filter((l) => String(l.userId) === String(session.id))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)),
+        visible = all.filter(
+          (l) => !filter?.value || l.status === filter.value,
+        ),
+        approved = all.filter((l) => l.status === "Approved").length,
+        pending = all.filter((l) => l.status === "Pending").length,
+        rejected = all.filter((l) => l.status === "Rejected").length,
+        used = H.approvedLeaveDays(session.id, currentYear()),
+        left = remaining();
+      const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      set("myLeaveBalance", `${left} days`);
+      set("leaveUsedCount", used);
+      set("leaveUsedLabel", used);
+      set("leaveRemainingLabel", left);
+      set("pendingLeaveCount", pending);
+      set("approvedLeaveCount", approved);
+      set("rejectedLeaveCount", rejected);
+      set("leaveFormBalance", `${left} day${left === 1 ? "" : "s"}`);
+      const ring = document.querySelector("#leaveRing");
+      if (ring)
+        ring.style.setProperty(
+          "--used",
+          `${Math.min(100, quota() ? (used / quota()) * 100 : 0)}%`,
+        );
+      const rows = document.querySelector("#myLeaveRows");
+      if (!rows) return;
+      rows.innerHTML = visible.length
+        ? visible
+            .map(
+              (l) =>
+                `<tr><td><strong>${H.escapeHTML(l.type || "Leave")} leave</strong><small class="cell-subline">${H.escapeHTML(l.reasonType || "")}</small></td><td>${dateRange(l)}</td><td>${Number(l.days) || 0} day(s)</td><td>${niceSubmitted(l)}</td><td><span class="status-pill status-${statusClass(l.status)}"><i></i>${H.escapeHTML(l.status || "Pending")}</span></td><td>${l.comment ? `<div class="feedback-note"><strong>${l.status === "Approved" ? "HR note" : "Decision feedback"}</strong><span>${H.escapeHTML(l.comment)}</span></div>` : l.status === "Pending" ? '<span class="muted-copy">Awaiting HR review</span>' : '<span class="muted-copy">No additional note</span>'}</td></tr>`,
+            )
+            .join("")
+        : '<tr><td colspan="6" class="empty-row"><div class="empty-state"><span>◷</span><strong>No leave requests yet</strong><small>Use the form above to submit your first request.</small></div></td></tr>';
+    }
+    fromInput.addEventListener("change", () => {
+      updateDuration();
+      if (fromInput.value) toInput.min = fromInput.value;
+    });
+    toInput.addEventListener("change", updateDuration);
+    filter?.addEventListener("change", renderMine);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const f = new FormData(form),
+        type = String(f.get("type") || "Casual"),
+        reasonType = String(f.get("reasonType") || ""),
+        from = String(f.get("from") || ""),
+        to = String(f.get("to") || ""),
+        reason = String(f.get("reason") || "").trim(),
+        contact = String(f.get("contact") || "").trim(),
+        handover = String(f.get("handover") || "").trim(),
+        days = H.workingDaysBetween(from, to, working),
+        year = new Date((from || today) + "T12:00:00").getFullYear();
+      if (!from || !to || from > to) {
+        H.setMessage(
+          msg,
+          "Please choose a valid start date and end date.",
+          "error",
+        );
+        toast("Please check your leave dates.", "error");
+        return;
+      }
+      if (from < today) {
+        H.setMessage(msg, "Leave requests cannot start in the past.", "error");
+        return;
+      }
+      if (reason.length < 8) {
+        H.setMessage(
+          msg,
+          "Please provide a little more detail (at least 8 characters).",
+          "error",
+        );
+        return;
+      }
+      if (!days) {
+        H.setMessage(
+          msg,
+          "Your selected date range has no working days. Choose different dates.",
+          "error",
+        );
+        return;
+      }
+      const all = H.getLeaves(),
+        overlap = all.some(
+          (l) =>
+            String(l.userId) === String(session.id) &&
+            l.status !== "Rejected" &&
+            from <= l.to &&
+            to >= l.from,
+        );
+      if (overlap) {
+        H.setMessage(
+          msg,
+          "These dates overlap another pending or approved request. Review your leave history first.",
+          "error",
+        );
+        toast("Overlapping leave request detected.", "error");
+        return;
+      }
+      const used = all
+        .filter(
+          (l) =>
+            String(l.userId) === String(session.id) &&
+            l.status !== "Rejected" &&
+            new Date(l.from + "T12:00:00").getFullYear() === year,
+        )
+        .reduce(
+          (sum, l) => sum + H.workingDaysBetween(l.from, l.to, working),
+          0,
+        );
+      if (used + days > quota()) {
+        H.setMessage(
+          msg,
+          `This request would exceed your ${quota()} day yearly quota. ${used} day(s) are already reserved or approved.`,
+          "error",
+        );
+        return;
+      }
+      const record = {
+        id: Date.now(),
+        userId: session.id,
+        type,
+        reasonType,
+        from,
+        to,
+        days,
+        reason,
+        contact,
+        handover,
+        status: "Pending",
+        comment: "",
+        createdAt: Date.now(),
+      };
+      all.push(record);
+      H.saveLeaves(all);
+      form.reset();
+      fromInput.min = H.today();
+      toInput.min = H.today();
+      duration.textContent = "Select your dates";
+      H.setMessage(
+        msg,
+        "Leave request submitted. It is now in the HR review queue; your status will update here after a decision.",
+        "success",
+      );
+      toast("Leave request submitted successfully. HR can now review it.");
+      renderMine();
+      document
+        .querySelector("#leaveHistory")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    renderMine();
+    updateDuration();
+  }
+});

@@ -1,2 +1,92 @@
-window.HCMAttendance={init(){const H=window.HCM,session=H.getSession(),inBtn=document.querySelector("#checkInBtn"),outBtn=document.querySelector("#checkOutBtn");if(!inBtn||!session)return;const msg=document.querySelector("#attendanceMessage");function render(){const list=H.getAttendance().filter(a=>String(a.userId)===String(session.id)).sort((a,b)=>b.date.localeCompare(a.date));const today=list.find(a=>a.date===H.today());document.querySelector("#myTodayStatus").textContent=today?(today.status==="Half day"?"Half day":today.status):"Not checked in";document.querySelector("#myTodayTime").textContent=today?`In ${today.checkIn||"—"} · Out ${today.checkOut||"—"}`:"Check in to begin";inBtn.disabled=!!today;outBtn.disabled=!today||!!today.checkOut;document.querySelector("#myAttendanceRows").innerHTML=list.length?list.map(a=>`<tr><td>${H.fmtDate(a.date)}</td><td>${a.checkIn||"—"}</td><td>${a.checkOut||"—"}</td><td><span class="badge ${a.status.toLowerCase().replace(" ","-")}">${a.status}</span></td><td>${a.hours? a.hours.toFixed(2)+" h":"—"}</td></tr>`).join(""):'<tr><td colspan="5" class="empty-row">No attendance records yet.</td></tr>';const now=new Date(),monday=new Date(now);monday.setDate(now.getDate()-((now.getDay()+6)%7));const start=monday.toLocaleDateString("en-CA");const hrs=list.filter(a=>a.date>=start&&a.checkOut).reduce((s,a)=>s+(a.hours||0),0);document.querySelector("#myWeekHours").textContent=hrs.toFixed(1)}
-inBtn.addEventListener("click",()=>{const all=H.getAttendance();if(all.some(a=>String(a.userId)===String(session.id)&&a.date===H.today()))return;const checkIn=H.timeNow();all.push({id:Date.now(),userId:session.id,date:H.today(),checkIn,checkOut:"",status:H.statusForCheckin(checkIn),hours:0});H.saveAttendance(all);H.setMessage(msg,`Checked in at ${checkIn}. Status: ${all[all.length-1].status}.`,"success");render()});outBtn.addEventListener("click",()=>{const all=H.getAttendance(),r=all.find(a=>String(a.userId)===String(session.id)&&a.date===H.today());if(!r||r.checkOut)return;const checkOut=H.timeNow();r.checkOut=checkOut;r.hours=H.hoursBetween(r.checkIn,checkOut);if(r.hours<5)r.status="Half day";H.saveAttendance(all);H.setMessage(msg,`Checked out at ${checkOut}. Work duration: ${r.hours.toFixed(2)} hours.`,"success");render()});render()}};document.addEventListener("DOMContentLoaded",()=>window.HCMAttendance?.init());
+window.HCMAttendance = {
+  init() {
+    const H = window.HCM,
+      session = H.getSession(),
+      inBtn = document.querySelector("#checkInBtn"),
+      outBtn = document.querySelector("#checkOutBtn");
+    if (!inBtn || !session) return;
+    const msg = document.querySelector("#attendanceMessage");
+    function render() {
+      const list = H.getAttendance()
+        .filter((a) => String(a.userId) === String(session.id))
+        .sort((a, b) => b.date.localeCompare(a.date));
+      const today = list.find((a) => a.date === H.today());
+      document.querySelector("#myTodayStatus").textContent = today
+        ? today.status === "Half day"
+          ? "Half day"
+          : today.status
+        : "Not checked in";
+      document.querySelector("#myTodayTime").textContent = today
+        ? `In ${today.checkIn || "—"} · Out ${today.checkOut || "—"}`
+        : "Check in to begin";
+      inBtn.disabled = !!today;
+      outBtn.disabled = !today || !!today.checkOut;
+      document.querySelector("#myAttendanceRows").innerHTML = list.length
+        ? list
+            .map(
+              (a) =>
+                `<tr><td>${H.fmtDate(a.date)}</td><td>${a.checkIn || "—"}</td><td>${a.checkOut || "—"}</td><td><span class="badge ${a.status.toLowerCase().replace(" ", "-")}">${a.status}</span></td><td>${a.hours ? a.hours.toFixed(2) + " h" : "—"}</td></tr>`,
+            )
+            .join("")
+        : '<tr><td colspan="5" class="empty-row">No attendance records yet.</td></tr>';
+      const now = new Date(),
+        monday = new Date(now);
+      monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      const start = monday.toLocaleDateString("en-CA");
+      const hrs = list
+        .filter((a) => a.date >= start && a.checkOut)
+        .reduce((s, a) => s + (a.hours || 0), 0);
+      document.querySelector("#myWeekHours").textContent = hrs.toFixed(1);
+    }
+    inBtn.addEventListener("click", () => {
+      const all = H.getAttendance();
+      if (
+        all.some(
+          (a) =>
+            String(a.userId) === String(session.id) && a.date === H.today(),
+        )
+      )
+        return;
+      const checkIn = H.timeNow();
+      all.push({
+        id: Date.now(),
+        userId: session.id,
+        date: H.today(),
+        checkIn,
+        checkOut: "",
+        status: H.statusForCheckin(checkIn),
+        hours: 0,
+      });
+      H.saveAttendance(all);
+      H.setMessage(
+        msg,
+        `Checked in at ${checkIn}. Status: ${all[all.length - 1].status}.`,
+        "success",
+      );
+      render();
+    });
+    outBtn.addEventListener("click", () => {
+      const all = H.getAttendance(),
+        r = all.find(
+          (a) =>
+            String(a.userId) === String(session.id) && a.date === H.today(),
+        );
+      if (!r || r.checkOut) return;
+      const checkOut = H.timeNow();
+      r.checkOut = checkOut;
+      r.hours = H.hoursBetween(r.checkIn, checkOut);
+      if (r.hours < 5) r.status = "Half day";
+      H.saveAttendance(all);
+      H.setMessage(
+        msg,
+        `Checked out at ${checkOut}. Work duration: ${r.hours.toFixed(2)} hours.`,
+        "success",
+      );
+      render();
+    });
+    render();
+  },
+};
+document.addEventListener("DOMContentLoaded", () =>
+  window.HCMAttendance?.init(),
+);

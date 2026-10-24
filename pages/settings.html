@@ -1,1 +1,106 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Company Settings | HCM Lite</title><link rel="stylesheet" href="../CSS/style.css"><script src="../JS/storage.js" defer></script><script src="../JS/ui.js" defer></script><script src="../JS/auth.js" defer></script><script src="../JS/settings.js" defer></script></head><body><div class="app-shell"><aside class="sidebar"><a class="brand" href="admin.html"><span class="brand-icon">H</span><span class="brand-copy"><strong>HCM <span>Lite</span></strong><small>HR workspace</small></span></a><p class="nav-label">WORKSPACE</p><a class="nav-link" href="admin.html">▦ Overview</a><a class="nav-link" href="employees.html">♙ Employees</a><a class="nav-link" href="leaves.html">▣ Leave requests</a><a class="nav-link active" href="settings.html">⚙ Settings</a><a class="nav-link" href="payslip.html">＄ Payslips</a><div class="sidebar-bottom"><button class="nav-link" data-logout>↪ Sign out</button></div></aside><main class="main-content"><header class="topbar"><div><p class="eyebrow">CONFIGURATION</p><h1>Company settings</h1></div><div class="user-pill" id="currentUser"></div></header><section class="panel settings-panel"><div class="panel-heading"><div><h2>Attendance & leave rules</h2><p>These rules affect attendance labels and leave balances.</p></div></div><form id="settingsForm" class="stack-form"><label>Company name<input name="name" required></label><label>Office start time<input name="officeStart" type="time" required></label><label>Late grace period (minutes)<input name="graceMinutes" type="number" min="0" max="180" required></label><label>Yearly leave quota (working days)<input name="leaveQuota" type="number" min="0" max="365" required></label><fieldset><legend>Working days</legend><div class="weekday-grid"><label><input type="checkbox" name="workingDays" value="1"> Mon</label><label><input type="checkbox" name="workingDays" value="2"> Tue</label><label><input type="checkbox" name="workingDays" value="3"> Wed</label><label><input type="checkbox" name="workingDays" value="4"> Thu</label><label><input type="checkbox" name="workingDays" value="5"> Fri</label><label><input type="checkbox" name="workingDays" value="6"> Sat</label><label><input type="checkbox" name="workingDays" value="0"> Sun</label></div></fieldset><button class="primary-btn">Save settings</button><p class="message" id="settingsMessage" aria-live="polite"></p></form></section></main></div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Company Settings | HCM Lite</title>
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <script src="../JS/storage.js" defer></script>
+    <script src="../JS/ui.js" defer></script>
+    <script src="../JS/auth.js" defer></script>
+    <script src="../JS/settings.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="admin.html"
+          ><span class="brand-icon">H</span
+          ><span class="brand-copy"
+            ><strong>HCM <span>Lite</span></strong
+            ><small>HR workspace</small></span
+          ></a
+        >
+        <p class="nav-label">WORKSPACE</p>
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <a class="nav-link" href="admin.html">▦ Overview</a
+          ><a class="nav-link" href="employees.html">♙ Employees</a
+          ><a class="nav-link" href="leaves.html">▣ Leave requests</a
+          ><a class="nav-link active" href="settings.html">⚙ Settings</a
+          ><a class="nav-link" href="payslip.html">＄ Payslips</a>
+        </nav>
+        <div class="sidebar-bottom">
+          <button class="nav-link" data-logout>↪ Sign out</button>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">CONFIGURATION</p>
+            <h1>Company settings</h1>
+          </div>
+          <div class="user-pill" id="currentUser"></div>
+        </header>
+        <section class="panel settings-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Attendance & leave rules</h2>
+              <p>These rules affect attendance labels and leave balances.</p>
+            </div>
+          </div>
+          <form id="settingsForm" class="stack-form">
+            <label>Company name<input name="name" required /></label
+            ><label
+              >Office start time<input
+                name="officeStart"
+                type="time"
+                required /></label
+            ><label
+              >Late grace period (minutes)<input
+                name="graceMinutes"
+                type="number"
+                min="0"
+                max="180"
+                required /></label
+            ><label
+              >Yearly leave quota (working days)<input
+                name="leaveQuota"
+                type="number"
+                min="0"
+                max="365"
+                required
+            /></label>
+            <fieldset>
+              <legend>Working days</legend>
+              <div class="weekday-grid">
+                <label
+                  ><input type="checkbox" name="workingDays" value="1" />
+                  Mon</label
+                ><label
+                  ><input type="checkbox" name="workingDays" value="2" />
+                  Tue</label
+                ><label
+                  ><input type="checkbox" name="workingDays" value="3" />
+                  Wed</label
+                ><label
+                  ><input type="checkbox" name="workingDays" value="4" />
+                  Thu</label
+                ><label
+                  ><input type="checkbox" name="workingDays" value="5" />
+                  Fri</label
+                ><label
+                  ><input type="checkbox" name="workingDays" value="6" />
+                  Sat</label
+                ><label
+                  ><input type="checkbox" name="workingDays" value="0" />
+                  Sun</label
+                >
+              </div>
+            </fieldset>
+            <button class="primary-btn">Save settings</button>
+            <p class="message" id="settingsMessage" aria-live="polite"></p>
+          </form>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

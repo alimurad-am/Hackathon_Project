@@ -1,4 +1,159 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#090b14"><title>Leave Management | HCM Lite</title><link rel="stylesheet" href="../CSS/style.css"><script src="../JS/storage.js" defer></script><script src="../JS/ui.js" defer></script><script src="../JS/auth.js" defer></script><script src="../JS/leave.js" defer></script></head><body><div class="app-shell"><aside class="sidebar"><a class="brand" href="admin.html"><span class="brand-icon">H</span><span class="brand-copy"><strong>HCM <span>Lite</span></strong><small>PEOPLE OPERATIONS</small></span></a><p class="nav-label">ADMIN CONSOLE</p><a class="nav-link" href="admin.html"><span class="nav-glyph">⌂</span>Overview</a><a class="nav-link" href="employees.html"><span class="nav-glyph">♙</span>Employees</a><a class="nav-link active" href="leaves.html"><span class="nav-glyph">▦</span>Leave management <span class="nav-count" id="pendingNavCount">0</span></a><a class="nav-link" href="settings.html"><span class="nav-glyph">⚙</span>Company settings</a><a class="nav-link" href="payslip.html"><span class="nav-glyph">＄</span>Payroll & payslips</a><div class="sidebar-bottom"><div class="sidebar-note"><span class="online-dot"></span><span>Workspace synced<br><small>Saved in this browser</small></span></div><button class="nav-link" data-logout><span class="nav-glyph">↗</span>Sign out</button></div></aside><main class="main-content"><header class="topbar"><div><p class="eyebrow">PEOPLE OPERATIONS / TIME OFF</p><h1>Leave management<span class="title-period">.</span></h1><p class="page-subtitle">Review requests, record decisions and keep a clear audit trail.</p></div><div class="user-pill" id="currentUser"></div></header>
-<section class="welcome-banner premium-banner admin-leave-banner"><div><span class="banner-chip"><span class="online-dot"></span> HR REVIEW CENTER</span><h2>Every request deserves a clear decision.</h2><p>Review employee leave requests and communicate the outcome with a note.</p></div><div class="banner-art"><span class="art-orbit orbit-one"></span><span class="art-orbit orbit-two"></span><span class="art-spark">✦</span><span class="art-monogram">✓</span></div></section>
-<section class="stat-grid three-cols leave-admin-stats"><article class="stat-card"><div class="stat-top"><span>Awaiting review</span><span class="metric-icon amber">◷</span></div><strong id="adminPendingCount">0</strong><small>Requests requiring a decision</small></article><article class="stat-card"><div class="stat-top"><span>Approved</span><span class="metric-icon mint">✓</span></div><strong id="adminApprovedCount">0</strong><small>Approved requests on record</small></article><article class="stat-card"><div class="stat-top"><span>Rejected</span><span class="metric-icon rose">×</span></div><strong id="adminRejectedCount">0</strong><small>Requests declined with feedback</small></article></section>
-<section class="panel leave-admin-panel"><div class="panel-heading"><div><span class="section-kicker">REQUEST INBOX</span><h2>Employee leave requests</h2><p>Choose a request to review its details and record your decision.</p></div><div class="leave-filter-controls"><label class="search-field"><span>⌕</span><input id="leaveSearch" type="search" placeholder="Search employee…"></label><select id="leaveFilter" aria-label="Filter requests"><option value="">All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div></div><div class="table-wrap"><table class="leave-admin-table"><thead><tr><th>Employee</th><th>Leave request</th><th>Dates / duration</th><th>Reason & handover</th><th>Status</th><th>Review action</th></tr></thead><tbody id="leaveRows"><tr><td colspan="6" class="empty-row">Loading requests…</td></tr></tbody></table></div><p class="message" id="leaveMessage" aria-live="polite"></p><div class="audit-note"><span>◈</span><p><strong>Decision integrity</strong><br>Rejections require a reason. Each decision is saved with a timestamp and shown to the employee in their own leave history.</p></div></section></main></div></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090b14" />
+    <title>Leave Management | HCM Lite</title>
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <script src="../JS/storage.js" defer></script>
+    <script src="../JS/ui.js" defer></script>
+    <script src="../JS/auth.js" defer></script>
+    <script src="../JS/leave.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="admin.html"
+          ><span class="brand-icon">H</span
+          ><span class="brand-copy"
+            ><strong>HCM <span>Lite</span></strong
+            ><small>PEOPLE OPERATIONS</small></span
+          ></a
+        >
+        <p class="nav-label">ADMIN CONSOLE</p>
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <a class="nav-link" href="admin.html"
+            ><span class="nav-glyph">⌂</span>Overview</a
+          ><a class="nav-link" href="employees.html"
+            ><span class="nav-glyph">♙</span>Employees</a
+          ><a class="nav-link active" href="leaves.html"
+            ><span class="nav-glyph">▦</span>Leave management
+            <span class="nav-count" id="pendingNavCount">0</span></a
+          ><a class="nav-link" href="settings.html"
+            ><span class="nav-glyph">⚙</span>Company settings</a
+          ><a class="nav-link" href="payslip.html"
+            ><span class="nav-glyph">＄</span>Payroll & payslips</a
+          >
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="sidebar-note">
+            <span class="online-dot"></span
+            ><span
+              >Workspace synced<br /><small>Saved in this browser</small></span
+            >
+          </div>
+          <button class="nav-link" data-logout>
+            <span class="nav-glyph">↗</span>Sign out
+          </button>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">PEOPLE OPERATIONS / TIME OFF</p>
+            <h1>Leave management<span class="title-period">.</span></h1>
+            <p class="page-subtitle">
+              Review requests, record decisions and keep a clear audit trail.
+            </p>
+          </div>
+          <div class="user-pill" id="currentUser"></div>
+        </header>
+        <section class="welcome-banner premium-banner admin-leave-banner">
+          <div>
+            <span class="banner-chip"
+              ><span class="online-dot"></span> HR REVIEW CENTER</span
+            >
+            <h2>Every request deserves a clear decision.</h2>
+            <p>
+              Review employee leave requests and communicate the outcome with a
+              note.
+            </p>
+          </div>
+          <div class="banner-art">
+            <span class="art-orbit orbit-one"></span
+            ><span class="art-orbit orbit-two"></span
+            ><span class="art-spark">✦</span><span class="art-monogram">✓</span>
+          </div>
+        </section>
+        <section class="stat-grid three-cols leave-admin-stats">
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Awaiting review</span
+              ><span class="metric-icon amber">◷</span>
+            </div>
+            <strong id="adminPendingCount">0</strong
+            ><small>Requests requiring a decision</small>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Approved</span><span class="metric-icon mint">✓</span>
+            </div>
+            <strong id="adminApprovedCount">0</strong
+            ><small>Approved requests on record</small>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>Rejected</span><span class="metric-icon rose">×</span>
+            </div>
+            <strong id="adminRejectedCount">0</strong
+            ><small>Requests declined with feedback</small>
+          </article>
+        </section>
+        <section class="panel leave-admin-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-kicker">REQUEST INBOX</span>
+              <h2>Employee leave requests</h2>
+              <p>
+                Choose a request to review its details and record your decision.
+              </p>
+            </div>
+            <div class="leave-filter-controls">
+              <label class="search-field"
+                ><span>⌕</span
+                ><input
+                  id="leaveSearch"
+                  type="search"
+                  placeholder="Search employee…" /></label
+              ><select id="leaveFilter" aria-label="Filter requests">
+                <option value="">All statuses</option>
+                <option>Pending</option>
+                <option>Approved</option>
+                <option>Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="leave-admin-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Leave request</th>
+                  <th>Dates / duration</th>
+                  <th>Reason & handover</th>
+                  <th>Status</th>
+                  <th>Review action</th>
+                </tr>
+              </thead>
+              <tbody id="leaveRows">
+                <tr>
+                  <td colspan="6" class="empty-row">Loading requests…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="message" id="leaveMessage" aria-live="polite"></p>
+          <div class="audit-note">
+            <span>◈</span>
+            <p>
+              <strong>Decision integrity</strong><br />Rejections require a
+              reason. Each decision is saved with a timestamp and shown to the
+              employee in their own leave history.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
